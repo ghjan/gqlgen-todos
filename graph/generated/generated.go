@@ -224,11 +224,6 @@ type Todo {
   user: User!
 }
 
-type User {
-  id: ID!
-  name: String!
-}
-
 type Query {
   todos: [Todo!]!
 }
@@ -241,6 +236,16 @@ input NewTodo {
 type Mutation {
   createTodo(input: NewTodo!): Todo!
 }`},
+	&ast.Source{Name: "schema/user/user.graphql", Input: `# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type User {
+  id: ID!
+  name: String!
+}
+
+`},
 )
 
 // endregion ************************** generated!.gotpl **************************

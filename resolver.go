@@ -1,7 +1,5 @@
 package gqlgen_todos
 
-//go:generate go run github.com/99designs/gqlgen
-
 import (
 	"context"
 	"fmt"
@@ -45,7 +43,9 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*models.Todo, error) {
 	return r.todos, nil
 }
 
-type todoResolver struct{ *Resolver }
+type todoResolver struct {
+	*Resolver
+}
 
 func (r *todoResolver) User(ctx context.Context, obj *models.Todo) (*models.User, error) {
 	return &models.User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
