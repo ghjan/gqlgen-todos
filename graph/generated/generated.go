@@ -46,10 +46,12 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Mutation struct {
 		CreateTodo func(childComplexity int, input models.NewTodo) int
+		CreateUser func(childComplexity int, input models.NewUser) int
 	}
 
 	Query struct {
 		Todos func(childComplexity int) int
+		Users func(childComplexity int) int
 	}
 
 	Todo struct {
@@ -67,9 +69,11 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateTodo(ctx context.Context, input models.NewTodo) (*models.Todo, error)
+	CreateUser(ctx context.Context, input models.NewUser) (*models.User, error)
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*models.Todo, error)
+	Users(ctx context.Context) ([]*models.User, error)
 }
 type TodoResolver interface {
 	User(ctx context.Context, obj *models.Todo) (*models.User, error)
@@ -102,12 +106,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(models.NewTodo)), true
 
+	case "Mutation.createUser":
+		if e.complexity.Mutation.CreateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(models.NewUser)), true
+
 	case "Query.todos":
 		if e.complexity.Query.Todos == nil {
 			break
 		}
 
 		return e.complexity.Query.Todos(childComplexity), true
+
+	case "Query.users":
+		if e.complexity.Query.Users == nil {
+			break
+		}
+
+		return e.complexity.Query.Users(childComplexity), true
 
 	case "Todo.done":
 		if e.complexity.Todo.Done == nil {
@@ -224,8 +247,15 @@ type Todo {
   user: User!
 }
 
+type User {
+  id: ID!
+  name: String!
+}
+
+
 type Query {
   todos: [Todo!]!
+  users: [User!]!
 }
 
 input NewTodo {
@@ -233,19 +263,14 @@ input NewTodo {
   userId: String!
 }
 
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
-}`},
-	&ast.Source{Name: "schema/user/user.graphql", Input: `# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-type User {
-  id: ID!
+input NewUser {
   name: String!
 }
 
-`},
+type Mutation {
+  createTodo(input: NewTodo!): Todo!
+  createUser(input: NewUser!): User!
+}`},
 )
 
 // endregion ************************** generated!.gotpl **************************
@@ -258,6 +283,20 @@ func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, 
 	var arg0 models.NewTodo
 	if tmp, ok := rawArgs["input"]; ok {
 		arg0, err = ec.unmarshalNNewTodo2githubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐNewTodo(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 models.NewUser
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNNewUser2githubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐNewUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -360,6 +399,50 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	return ec.marshalNTodo2ᚖgithubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐTodo(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateUser(rctx, args["input"].(models.NewUser))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.User)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -395,6 +478,43 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐTodo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Users(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.User)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1869,6 +1989,24 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj inter
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj interface{}) (models.NewUser, error) {
+	var it models.NewUser
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1894,6 +2032,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createTodo":
 			out.Values[i] = ec._Mutation_createTodo(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createUser":
+			out.Values[i] = ec._Mutation_createUser(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -1932,6 +2075,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_todos(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "users":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_users(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2312,6 +2469,10 @@ func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋghjanᚋgqlgenᚑto
 	return ec.unmarshalInputNewTodo(ctx, v)
 }
 
+func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐNewUser(ctx context.Context, v interface{}) (models.NewUser, error) {
+	return ec.unmarshalInputNewUser(ctx, v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
@@ -2379,6 +2540,43 @@ func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋghjanᚋgqlgenᚑtodo
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋghjanᚋgqlgenᚑtodosᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {

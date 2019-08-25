@@ -13,6 +13,7 @@ import (
 
 type Resolver struct {
 	todos []*models.Todo
+	users []*models.User
 }
 
 func (r *Resolver) Mutation() generated.MutationResolver {
@@ -36,6 +37,14 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input models.NewTodo)
 	r.todos = append(r.todos, todo)
 	return todo, nil
 }
+func (r *mutationResolver) CreateUser(ctx context.Context, input models.NewUser) (*models.User, error) {
+	user := &models.User{
+		ID:   fmt.Sprintf("U%d", rand.Int()),
+		Name: input.Name,
+	}
+	r.users = append(r.users, user)
+	return user, nil
+}
 
 type queryResolver struct{ *Resolver }
 
@@ -43,9 +52,11 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*models.Todo, error) {
 	return r.todos, nil
 }
 
-type todoResolver struct {
-	*Resolver
+func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
+	return r.users, nil
 }
+
+type todoResolver struct{ *Resolver }
 
 func (r *todoResolver) User(ctx context.Context, obj *models.Todo) (*models.User, error) {
 	return &models.User{ID: obj.UserID, Name: "user " + obj.UserID}, nil

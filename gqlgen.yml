@@ -23,5 +23,7 @@ autobind: []
 # Tell gqlgen about any existing models you want to reuse for
 # graphql. These normally come from the db or a remote api.
 models:
+  User:
+    model: github.com/ghjan/gqlgen-todos/models.User
   Todo:
     model: github.com/ghjan/gqlgen-todos/models.Todo

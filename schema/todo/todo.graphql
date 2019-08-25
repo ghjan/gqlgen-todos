@@ -9,8 +9,15 @@ type Todo {
   user: User!
 }
 
+type User {
+  id: ID!
+  name: String!
+}
+
+
 type Query {
   todos: [Todo!]!
+  users: [User!]!
 }
 
 input NewTodo {
@@ -18,6 +25,11 @@ input NewTodo {
   userId: String!
 }
 
+input NewUser {
+  name: String!
+}
+
 type Mutation {
   createTodo(input: NewTodo!): Todo!
+  createUser(input: NewUser!): User!
 }
