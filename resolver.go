@@ -1,30 +1,36 @@
 package gqlgen_todos
+
 //go:generate go run github.com/99designs/gqlgen
 
 import (
 	"context"
 	"fmt"
 	"math/rand"
-) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
+
+	"github.com/ghjan/gqlgen-todos/graph/generated"
+	"github.com/ghjan/gqlgen-todos/models"
+)
+
+// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 type Resolver struct {
-	todos []*Todo
+	todos []*models.Todo
 }
 
-func (r *Resolver) Mutation() MutationResolver {
+func (r *Resolver) Mutation() generated.MutationResolver {
 	return &mutationResolver{r}
 }
-func (r *Resolver) Query() QueryResolver {
+func (r *Resolver) Query() generated.QueryResolver {
 	return &queryResolver{r}
 }
-func (r *Resolver) Todo() TodoResolver {
+func (r *Resolver) Todo() generated.TodoResolver {
 	return &todoResolver{r}
 }
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo, error) {
-	todo := &Todo{
+func (r *mutationResolver) CreateTodo(ctx context.Context, input models.NewTodo) (*models.Todo, error) {
+	todo := &models.Todo{
 		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rand.Int()),
 		UserID: input.UserID,
@@ -35,12 +41,12 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
+func (r *queryResolver) Todos(ctx context.Context) ([]*models.Todo, error) {
 	return r.todos, nil
 }
 
 type todoResolver struct{ *Resolver }
 
-func (r *todoResolver) User(ctx context.Context, obj *Todo) (*User, error) {
-	return &User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
+func (r *todoResolver) User(ctx context.Context, obj *models.Todo) (*models.User, error) {
+	return &models.User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
 }
